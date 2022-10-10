@@ -2,6 +2,7 @@ import pyupbit
 import time
 import streamlit as st
 import matplotlib.pyplot as plt
+import plotly.graph_objs as go
 
 import ss_ta as sta
 
@@ -50,6 +51,19 @@ def draw_chart(df):
     st.pyplot(plt)
 
 
+def draw_chart_plotly(df):
+    candle = go.Candlestick(x=df.index)
+    candle = go.Candlestick(
+        x=df.index,
+        open=df['open'],
+        high=df['high'],
+        low=df['low'],
+        close=df['close'])
+    fig = go.Figure(data=candle)
+    st.plotly_chart(fig)
+
+
+
 def coin_check(interval_time):
     st.markdown("#### 업비트 코인 체크")
     numbers = st.empty()
@@ -76,3 +90,4 @@ coin_data = get_coin_data(selected_coin, intervalTime)
 st.subheader(f"{selected_coin} {intervalTime}")
 st.dataframe(coin_data.tail())
 draw_chart(coin_data)
+draw_chart_plotly(coin_data)

@@ -3,7 +3,8 @@ import time
 import streamlit as st
 import matplotlib.pyplot as plt
 import plotly.graph_objs as go
-
+import mplfinance as mpf
+import numpy as np
 import ss_ta as sta
 
 st.set_page_config(
@@ -60,8 +61,51 @@ def draw_chart_plotly(df):
         low=df['low'],
         close=df['close'])
     fig = go.Figure(data=candle)
+    fig.update_layout(xaxis_autorange=True, yaxis_autorange=True, autosize=True,
+                      margin=dict(l=10, r=10, b=50, t=50, pad=1),
+                      )
     st.plotly_chart(fig)
 
+
+def draw_chart_mpl_finance(df):
+
+    adps = []
+    # --------------이동평균선
+    adps.append(mpf.make_addplot(df['ma20'], panel=0, type='line', width=0.2, color='b'))
+    adps.append(mpf.make_addplot(df['ma5'], panel=0, type='line', width=1.5, color='r'))
+    # -------------------MFI
+    adps.append(
+        mpf.make_addplot(df['MFI10'], panel=1, type='line', width=0.7, ylabel='MFI', color='r'))
+    adps.append(
+        mpf.make_addplot(np.ones((len(df))) * 20, panel=1, type='line', color='red', linestyle='dotted',
+                         secondary_y=False))
+    adps.append(
+        mpf.make_addplot(np.ones((len(df))) * 80, panel=1, type='line', color='red', linestyle='dotted',
+                         secondary_y=False))
+
+    # # -------------------CCI
+    # adps.append(
+    #     mpf.make_addplot(df['cci'], panel=2, type='line', width=0.7, ylabel='CCI', color='b'))
+    # adps.append(
+    #     mpf.make_addplot(np.ones((len(df))) * -100, panel=2, type='line', color='red', linestyle='dotted',
+    #                      secondary_y=False))
+    # adps.append(
+    #     mpf.make_addplot(np.ones((len(df))) * 100, panel=2, type='line', color='red', linestyle='dotted',
+    #                      secondary_y=False))
+
+    fig, axs = mpf.plot(df,
+                        type='candle',
+                        tight_layout=True,
+                        # style='charles',
+                        style='yahoo',
+                        figratio=(3.5, 1),
+                        figscale=1,
+                        addplot=adps,
+                        # volume=True,
+                        returnfig=True
+                        )
+
+    st.pyplot(fig)
 
 
 def coin_check(interval_time):
@@ -89,5 +133,7 @@ if st.sidebar.button("시작", disabled=True):
 coin_data = get_coin_data(selected_coin, intervalTime)
 st.subheader(f"{selected_coin} {intervalTime}")
 st.dataframe(coin_data.tail())
-draw_chart(coin_data)
-draw_chart_plotly(coin_data)
+
+# draw_chart(coin_data)
+# draw_chart_plotly(coin_data)
+draw_chart_mpl_finance(df=coin_data)

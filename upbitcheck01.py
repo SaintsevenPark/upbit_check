@@ -1,6 +1,7 @@
 import pyupbit
 import time
 import streamlit as st
+import matplotlib.pyplot as plt
 
 import ss_ta as sta
 
@@ -15,6 +16,38 @@ st.set_page_config(
 def get_coin_list():
     rtn_coin_list = pyupbit.get_tickers(fiat="KRW")
     return rtn_coin_list
+
+
+@st.cache
+def get_coin_data(coin_name, coin_interval):
+    rtn_ticker, rtn_interval, rtn_df = sta.getDf_name(coin_name, coin_interval)
+    return rtn_df
+
+
+def draw_chart(df):
+    plt.figure(figsize=(20, 5))
+
+    width = 0.035
+    width2 = 0.001
+
+    up = df[df.close >= df.open]
+    down = df[df.close < df.open]
+
+    col1 = 'red'
+    col2 = 'blue'
+
+    plt.bar(up.index, up.close - up.open, width, bottom=up.open, color=col1)
+    plt.bar(up.index, up.high - up.close, width2, bottom=up.close, color=col1)
+    plt.bar(up.index, up.low - up.open, width2, bottom=up.open, color=col1)
+
+    plt.bar(down.index, down.close - down.open, width, bottom=down.open, color=col2)
+    plt.bar(down.index, down.high - down.open, width2, bottom=down.open, color=col2)
+    plt.bar(down.index, down.low - down.close, width2, bottom=down.close, color=col2)
+
+    # rotate x-axis tick labels
+    plt.xticks(rotation=45, ha='right')
+
+    st.pyplot(plt)
 
 
 def coin_check(interval_time):
@@ -33,10 +66,13 @@ coin_number = st.sidebar.number_input('코인넘버', min_value=0, max_value=len
 selected_coin = st.sidebar.selectbox('코인넘버', coin_list, index=coin_number)
 intervalTime = st.sidebar.selectbox('기간 선택', ('minute5', 'minute10', 'minute15', 'minute30', 'minute60', 'D'))
 strategy = st.sidebar.selectbox('전략 선택',
-                        ('단순이평선교차',
-                         'RSI'))
+                                ('단순이평선교차',
+                                 'RSI'))
 
 if st.sidebar.button("시작", disabled=True):
     coin_check(interval_time=intervalTime)
 
-
+coin_data = get_coin_data(selected_coin, intervalTime)
+st.subheader(f"{selected_coin} {intervalTime}")
+st.dataframe(coin_data.tail())
+draw_chart(coin_data)

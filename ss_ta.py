@@ -41,9 +41,9 @@ def getDf_name(tick, interval):
         else:
             df.NMF.values[i + 1] = df.TP.values[i + 1] * df.volume.values[i + 1]
             df.PMF.values[i + 1] = 0
-    df['MFR'] = (df.PMF.rolling(window=10).sum() /
-                 df.NMF.rolling(window=10).sum())
-    df['MFI10'] = 100 - 100 / (1 + df['MFR'])
+    df['MFR'] = (df.PMF.rolling(window=14).sum() /
+                 df.NMF.rolling(window=14).sum())
+    df['MFI14'] = 100 - 100 / (1 + df['MFR'])
 
     # IIP
     df['II'] = (2 * df['close'] - df['high'] - df['low']) / (df['high'] - df['low']) * df['volume']
@@ -56,6 +56,12 @@ def getDf_name(tick, interval):
     AD = pd.DataFrame(D, index=df.index).rolling(window=14).mean()
     RSI = AU / (AD + AU) * 100
     df['RSI'] = RSI
+
+    # CCI
+    pt = (df['high'] + df['low'] + df['close']) / 3
+    sma = pt.rolling(14).mean()
+    mad = pt.rolling(14).apply(lambda x: pd.Series(x).mad())
+    df['CCI'] = (pt - sma) / (0.015 * mad)
 
     return (tick, interval, df)
 
@@ -103,9 +109,9 @@ def getDf(tick, interval):
         else:
             df.NMF.values[i + 1] = df.TP.values[i + 1] * df.volume.values[i + 1]
             df.PMF.values[i + 1] = 0
-    df['MFR'] = (df.PMF.rolling(window=10).sum() /
-                 df.NMF.rolling(window=10).sum())
-    df['MFI10'] = 100 - 100 / (1 + df['MFR'])
+    df['MFR'] = (df.PMF.rolling(window=14).sum() /
+                 df.NMF.rolling(window=14).sum())
+    df['MFI14'] = 100 - 100 / (1 + df['MFR'])
 
     # IIP
     df['II'] = (2 * df['close'] - df['high'] - df['low']) / (df['high'] - df['low']) * df['volume']
@@ -118,5 +124,11 @@ def getDf(tick, interval):
     AD = pd.DataFrame(D, index=df.index).rolling(window=14).mean()
     RSI = AU / (AD + AU) * 100
     df['RSI'] = RSI
+
+    # CCI
+    pt = (df['high'] + df['low'] + df['close']) / 3
+    sma = pt.rolling(14).mean()
+    mad = pt.rolling(14).apply(lambda x: pd.Series(x).mad())
+    df['CCI'] = (pt - sma) / (0.015 * mad)
 
     return (ticker, interval, df)

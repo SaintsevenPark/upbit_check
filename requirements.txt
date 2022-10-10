@@ -3,4 +3,8 @@ numpy
 pyupbit
 pandas
 plotly
+<<<<<<< HEAD
 mplfinance
+=======
+mplfinance
+>>>>>>> 06ad6a143f06c82a84f54178e8b650d8d237f710

@@ -165,7 +165,7 @@ if st.sidebar.button("시작", disabled=True):
     coin_check(interval_time=intervalTime)
 
 coin_data = get_coin_data(selected_coin, intervalTime)
-st.subheader(f"{selected_coin} {intervalTime}")
+st.subheader(f"{selected_coin}---{intervalTime}---{coin_data[-1:]['close']}")
 st.dataframe(coin_data.tail())
 
 # draw_chart(coin_data)
